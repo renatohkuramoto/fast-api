@@ -19,12 +19,10 @@ async def list_users():
 
 @router.post('/create-user', response_description='Create new user')
 async def create_user(user: UserIn):
-    try:
-        await UserController.create_new_user(user)
-    except Exception as error:
-        logging.error(error)
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'status': False, 'message': 'failure'})
-    return {'detail': {'status': True, 'message': 'created'}}
+    user = await UserController.create_new_user(user)
+    if user:
+        return {'detail': {'status': True, 'message': 'created'}}
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail={'status': False, 'message': 'username already exists'})
 
 
 @router.put('/update-user/{username}', response_description='Update registration data', dependencies=[Depends(JWTBearer())])
@@ -41,7 +39,6 @@ async def update_user(user: UserUpdate, username):
 
 @router.delete('/delete-user/{username}', response_description='Delete user in database', dependencies=[Depends(JWTBearer())])
 async def delete_user(username):
-    print(username)
     try:
         deleted_id = await UserController.delete_user(username)
         if deleted_id == 0:

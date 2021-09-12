@@ -1,3 +1,4 @@
+import databases
 from app.config import database, users
 import app.utils as Utils
 import bcrypt
@@ -9,6 +10,10 @@ async def list_all_users() -> dict:
 
 
 async def create_new_user(user) -> int:
+    query = users.select().where(users.c.username == user.username)
+    user_db = await database.fetch_one(query)
+    if user_db:
+        return None
     query = users.insert().values(
         username=user.username,
         password=hash_password(user.password),
@@ -20,7 +25,7 @@ async def create_new_user(user) -> int:
 
 async def update_user(user: str, username: str) -> int:
     query = users.update().where(users.c.username == username).values(
-        password=user.password,
+        password=hash_password(user.password),
         email=user.email
     )
     return await database.execute(query)

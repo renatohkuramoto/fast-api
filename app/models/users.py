@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, constr
 from datetime import datetime
 
 
@@ -6,7 +6,7 @@ class UserIn(BaseModel):
     username: str
     password: str
     email: str
-    level_access: int
+    level_access: constr(max_length=1)
 
     class Config:
         schema_extra = {
